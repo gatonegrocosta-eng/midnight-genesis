@@ -1,0 +1,17 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE TYPE user_role AS ENUM ('USER','BUSINESS','ADMIN');
+CREATE TYPE user_status AS ENUM ('ACTIVE','SUSPENDED','DELETED');
+CREATE TABLE users(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),name TEXT NOT NULL,email TEXT NOT NULL,phone TEXT,password_hash TEXT NOT NULL,role user_role NOT NULL DEFAULT 'USER',status user_status NOT NULL DEFAULT 'ACTIVE',created_at TIMESTAMPTZ NOT NULL DEFAULT now(),updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),deleted_at TIMESTAMPTZ);
+CREATE UNIQUE INDEX users_email_unique ON users(lower(email));
+CREATE TABLE businesses(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),owner_id UUID NOT NULL REFERENCES users(id),legal_name TEXT NOT NULL,trade_name TEXT NOT NULL,cnpj TEXT NOT NULL UNIQUE,category_id UUID,phone TEXT,whatsapp TEXT,website TEXT,instagram TEXT,status TEXT NOT NULL DEFAULT 'ACTIVE',created_at TIMESTAMPTZ NOT NULL DEFAULT now(),updated_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE INDEX businesses_owner_id_idx ON businesses(owner_id);
+CREATE INDEX businesses_category_id_idx ON businesses(category_id);
+CREATE TABLE locations(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,latitude NUMERIC(9,6) NOT NULL,longitude NUMERIC(9,6) NOT NULL,address TEXT NOT NULL,number TEXT,neighborhood TEXT,city TEXT NOT NULL,state TEXT NOT NULL,postal_code TEXT,created_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE INDEX locations_coordinates_idx ON locations(latitude,longitude);
+CREATE TABLE searches(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),user_id UUID REFERENCES users(id),query TEXT NOT NULL,normalized_query TEXT NOT NULL,intent JSONB,urgency TEXT,latitude NUMERIC(9,6),longitude NUMERIC(9,6),location_precision TEXT,created_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE INDEX searches_user_id_idx ON searches(user_id);
+CREATE TABLE search_results(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),search_id UUID NOT NULL REFERENCES searches(id) ON DELETE CASCADE,business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,relevance_score NUMERIC(10,4) NOT NULL,distance NUMERIC(10,3),eta_car INTEGER,eta_motorcycle INTEGER,availability_state TEXT NOT NULL,ranking_position INTEGER NOT NULL,exposure_type TEXT,created_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE INDEX search_results_search_id_idx ON search_results(search_id);
+CREATE TABLE refresh_tokens(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,token_hash TEXT NOT NULL,expires_at TIMESTAMPTZ NOT NULL,revoked_at TIMESTAMPTZ,created_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE INDEX refresh_tokens_user_id_idx ON refresh_tokens(user_id);
+CREATE TABLE audit_logs(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),actor_id UUID REFERENCES users(id),actor_role TEXT,action TEXT NOT NULL,resource_type TEXT NOT NULL,resource_id UUID,metadata JSONB,created_at TIMESTAMPTZ NOT NULL DEFAULT now());
