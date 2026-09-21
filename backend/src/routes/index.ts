@@ -1,0 +1,1 @@
+import type {FastifyInstance} from "fastify";import {authRoutes} from "./auth.js";export async function routes(app:FastifyInstance){await app.register(authRoutes,{prefix:"/api/v1/auth"});}
