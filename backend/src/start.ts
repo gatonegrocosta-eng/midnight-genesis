@@ -1,0 +1,1 @@
+import {buildApp} from "./app.js";import {routes} from "./routes/index.js";import {env} from "./config/env.js";const app=buildApp();await routes(app);await app.listen({host:"0.0.0.0",port:env.PORT});
