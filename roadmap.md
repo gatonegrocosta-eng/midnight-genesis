@@ -1,4 +1,4 @@
 # Roadmap
 
-- [ ] Deixar o repositório do GitHub público — bloqueado: o repositório ainda não existe. Precisa ser criado pelo Andrey no Lovable (menu + → GitHub → Conectar projeto → Criar repositório), depois a visibilidade muda no GitHub.
-- [ ] Publicar o app (site ainda não está no ar) — aguardando confirmação do Andrey
+- [x] Repositório do GitHub público — confirmado: gatonegrocosta-eng/midnight-genesis é público e idêntico ao projeto
+- [x] Publicar o app — publicação solicitada em 21/09/2026, URL esperada: https://midnight-tech-essence.lovable.app
